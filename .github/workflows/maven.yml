@@ -60,7 +60,7 @@ jobs:
           body: |
             Hello Team,
 
-            Automation test execution has been completed.
+            Automation test execution has been completed on Github Actions.
 
             Status: ${{ job.status }}
 
