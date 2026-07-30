@@ -1,9 +1,12 @@
-name: Automation Framework CI Pipline
+name: Automation Framework CI Pipeline
 
 on:
   push:
     branches:
       - main
+
+  schedule:
+    - cron: '30 3 * * *'   # Every day at 9:00 AM IST
 
 jobs:
   test:
@@ -28,11 +31,42 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Run Selenium Tests
-        run: mvn test -Dbrowser=chrome -DisHeadless=true -X
+        run: mvn clean test -Dbrowser=chrome -DisHeadless=true
 
       - name: Upload HTML Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: Extent-Report
-          path: report.html
+          path: ExtentReport.html
+
+      - name: Send Email with Extent Report
+        if: always()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+
+          subject: Automation Test Report - ${{ job.status }}
+
+            to:| 
+            rajalebalra@gmail.com,
+            bansodep0297@gmail.com,
+            howaleutkarsh@gmail.com
+          from: ${{ secrets.EMAIL_USERNAME }}
+
+          body: |
+            Hello Team,
+
+            Automation test execution has been completed.
+
+            Status: ${{ job.status }}
+
+            Please find the attached Extent Report.
+
+            Regards,
+            Automation Team
+
+          attachments: ExtentReport.html
